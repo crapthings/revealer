@@ -1,3 +1,5 @@
+import _ from 'lodash'
+import { useEffect, useRef } from 'react'
 import Highcharts from 'highcharts'
 import HighchartsMore from 'highcharts/highcharts-more.js'
 import SolidGauge from 'highcharts/modules/solid-gauge.js'
@@ -5,40 +7,11 @@ import SolidGauge from 'highcharts/modules/solid-gauge.js'
 HighchartsMore(Highcharts)
 SolidGauge(Highcharts)
 
-import _ from 'lodash'
-import c3 from 'c3'
-import { Suspense, useEffect, useRef } from 'react'
-
-import Loading from './loading'
-import stores from '../stores'
-
-export default function MemWidget () {
-  const {
-    mem,
-    getMem,
-  } = stores(({
-    mem,
-    getMem,
-  }) => ({
-    mem,
-    getMem,
-  }))
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      getMem()
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
-  if (!mem) {
-    return <Loading />
-  }
-
+export default function MemWidget ({ mem }) {
+  const percent = mem ? _.round((mem.free / mem.total) * 100) : 0
   return (
     <div className='flex flex-col bg-white'>
-      <MemGaugeChart percent={(mem.free / mem.total) * 100} />
+      <MemGaugeChart percent={percent} />
 
       <div className='flex-none flex text-center bg-gray-100'>
         <div className='flex-1 py-2'>
@@ -64,6 +37,9 @@ function MemGaugeChart ({ percent }) {
 
   useEffect(() => {
     if (chart.current) {
+      chart.current.series[0].update({
+        data: [percent]
+      })
       return
     }
 
@@ -79,50 +55,40 @@ function MemGaugeChart ({ percent }) {
         enabled: false,
       },
       pane: {
-        center: ['50%', '70%'],
-        size: '130%',
+        center: ['50%', '85%'],
+        size: '140%',
         startAngle: -90,
         endAngle: 90,
         background: {
-          backgroundColor: '#fff',
-          innerRadius: '95%',
+          backgroundColor: 'red',
+          innerRadius: '90%',
           outerRadius: '100%',
           shape: 'arc',
           borderColor: 'transparent'
         }
       },
       yAxis: {
-        stops: [
-          [0.3, '#55BF3B'], // green
-          [0.6, '#DDDF0D'], // yellow
-          [0.9, '#DF5353'] // red
-        ],
-        plotLines: [
-          {
-            // from: 0,
-            // to: 45,
-            // color: '#89A54E',
-            // outerRadius: '105%',
-            // thickness: '25%'
-            width: 5
-          }
-        ],
+        min: 0,
+        max: 100,
         lineWidth: 0,
         tickWidth: 0,
         minorTickInterval: null,
         labels: {
           enabled: false
         },
-        min: 0,
-        max: 100,
+        stops: [
+          [0.3, '#DF5353'], // red
+          [0.6, '#DDDF0D'], // yellow
+          [0.9, '#55BF3B'], // green
+        ],
       },
       plotOptions: {
         solidgauge: {
-          innerRadius: '95%',
+          innerRadius: '90%',
           dataLabels: {
-            y: 0,
+            // y: 0,
             borderWidth: 0,
-            useHTML: true
+            // useHTML: false
           }
         }
       },

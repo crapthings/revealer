@@ -1,6 +1,9 @@
+const { fork } = require('child_process')
 const path = require('path')
 
 const { app, BrowserWindow } = require('electron')
+
+// app.disableHardwareAcceleration()
 
 app
   .whenReady()
@@ -34,6 +37,8 @@ function createWindow () {
   App.setWindowButtonVisibility(false)
 
   App.webContents.openDevTools({ mode: 'detach' })
+
+  fork(__dirname + '/si.js')
 }
 
 function onClose () {

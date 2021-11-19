@@ -6,46 +6,21 @@ HighchartsMore(Highcharts)
 SolidGauge(Highcharts)
 
 import _ from 'lodash'
-import c3 from 'c3'
-
 
 import { useEffect, useRef } from 'react'
-import { FaApple } from 'react-icons/fa'
 
-import Loading from './loading'
-import stores from '../stores'
-
-export default function () {
+export default function ({ cpu, currentLoad, cpuTemperature }) {
   return (
     <div className='row-span-2 col-span-2 flex flex-col text-white bg-blue-600'>
       <div className='flex-none'>1</div>
-      <CpuCurrentLoadContainer>
-      {(cpuCurrentLoad) => (
-        <>
-          <CpuCurrentLoad cpuCurrentLoad={cpuCurrentLoad} />
-          <CpuLoadChart cpuCurrentLoad={cpuCurrentLoad} />
-        </>
-      )}
-      </CpuCurrentLoadContainer>
-      <Cpu />
+      <CpuCurrentLoad currentLoad={currentLoad} />
+      <CpuLoadChart currentLoad={currentLoad} />
+      <Cpu cpu={cpu} />
     </div>
   )
 }
 
-function Cpu () {
-  const cpu = stores(state => state.cpu)
-  const getCpu = stores(state => state.getCpu)
-
-  useEffect(() => {
-    getCpu()
-  }, [])
-
-  if (!cpu) {
-    return null
-  }
-
-  // console.log(JSON.stringify(cpu, null, 2))
-
+function Cpu ({ cpu }) {
   const l1 = (cpu.cache.l1i + cpu.cache.l1d).toString().length > 6
     ? `${(cpu.cache.l1i + cpu.cache.l1d) / 1024 / 1024} MB`
     : `${(cpu.cache.l1i + cpu.cache.l1d) / 1024} KB`
@@ -100,32 +75,11 @@ function Cpu () {
   )
 }
 
-function CpuCurrentLoadContainer ({ children }) {
-  const cpuCurrentLoad = stores(state => state.cpuCurrentLoad)
-  const getCpuCurrentLoad = stores(state => state.getCpuCurrentLoad)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      getCpuCurrentLoad()
-    }, 2000)
-
-    return () => clearInterval(timer)
-  }, [])
-
-  if (!cpuCurrentLoad) {
-    return null
-  }
-
-  // console.log(JSON.stringify(cpuCurrentLoad, null, 2))
-
-  return children(cpuCurrentLoad)
-}
-
-function CpuCurrentLoad ({ cpuCurrentLoad }) {
+function CpuCurrentLoad ({ currentLoad }) {
   return (
     <div className='overflow-auto flex-1 px-2'>
       <div className='grid grid-cols-8 gap-2 text-xs text-black'>
-        {[...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus, ...cpuCurrentLoad.cpus].map((cpu) => (
+        {[...currentLoad.cpus].map((cpu) => (
           <div className='p-2 rounded-md bg-white'>{_.round(cpu.load)}%</div>
         ))}
       </div>
@@ -133,7 +87,7 @@ function CpuCurrentLoad ({ cpuCurrentLoad }) {
   )
 }
 
-function CpuLoadChart ({ cpuCurrentLoad }) {
+function CpuLoadChart ({ currentLoad }) {
   const ref = useRef()
   const chart = useRef()
 
@@ -203,10 +157,10 @@ function CpuLoadChart ({ cpuCurrentLoad }) {
       },
       series: [{
         name: 'Speed',
-        data: [45]
+        data: [currentLoad.currentLoad]
       }]
     })
-  }, [cpuCurrentLoad.currentLoad])
+  }, [currentLoad.currentLoad])
 
   return (
     <div ref={ref} className='flex-1'></div>

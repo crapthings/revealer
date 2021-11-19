@@ -1,38 +1,17 @@
 const { contextBridge } = require('electron')
-const si = require('systeminformation')
+const ipc = require('node-ipc').default
+const mitt = require('mitt')
 
-contextBridge.exposeInMainWorld('api', {
-  getStaticData () {
-    return new Promise(function (resolve) {
-      si.getStaticData(resolve)
-    })
-  },
+const emitter = mitt()
 
-  getWifiConnections () {
-    return si.wifiConnections()
-  },
+ipc.config.silent = true
 
-  getNetworkStats () {
-    return si.wifiConnections()
-  },
+contextBridge.exposeInMainWorld('lib', {
+  emitter
+})
 
-  getCpu () {
-    return si.cpu()
-  },
-
-  getCpuTemperature () {
-    return si.cpuTemperature()
-  },
-
-  getCpuCurrentLoad () {
-    return si.currentLoad()
-  },
-
-  getMem () {
-    return si.mem()
-  },
-
-  getOsInfo () {
-    return si.osInfo()
-  }
+ipc.connectTo('revealer', function () {
+  ipc.of.revealer.on('data', function (data) {
+    emitter.emit('data', data)
+  })
 })

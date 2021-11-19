@@ -1,10 +1,9 @@
 import _ from 'lodash'
-import React from 'react'
 import { render } from 'react-dom'
 
 import App from './compositions/app'
 
-render(App(), document.getElementById('app'))
+render(<App />, document.getElementById('app'))
 
 if (import.meta.hot) {
   import.meta.hot.accept()
