@@ -16,5 +16,4 @@ ipc.serve(function () {
   })
 })
 
-
 ipc.server.start()
