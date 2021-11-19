@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}
+
+.c3-chart-arcs .c3-chart-arcs-background {
+  fill:  #F3F4F6;
+  stroke: none;
+}
